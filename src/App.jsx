@@ -98,18 +98,19 @@ export default function ChawengWeather() {
 
   const now = new Date();
   const bangkokOffset = 7 * 60;
-  const bangkokTime = new Date(now.getTime() + (bangkokOffset + now.getTimezoneOffset()) * 60000);
-  const currentHourStr = bangkokTime.toISOString().slice(0, 13).replace("T", "T").slice(0, 13);
+  const bangkokNow = new Date(now.getTime() + (bangkokOffset + now.getTimezoneOffset()) * 60000);
+  const bangkokDateStr = bangkokNow.toISOString().split('T')[0];
+  const bangkokHour = bangkokNow.getUTCHours();
+  const currentHourStr = bangkokDateStr + 'T' + bangkokHour.toString().padStart(2, '0');
 
   const getHourlyForDay = (dayOffset) => {
     if (!data) return [];
-    const target = new Date(now);
-    target.setDate(target.getDate() + dayOffset);
-    const bangkokOffset = 7 * 60;
-    const bangkokNow = new Date(target.getTime() + (bangkokOffset + target.getTimezoneOffset()) * 60000);
-    const dateStr = bangkokNow.toISOString().split("T")[0];
+    const target = new Date(bangkokNow);
+    target.setUTCDate(target.getUTCDate() + dayOffset);
+    const dateStr = target.toISOString().split('T')[0];
     return data.hourly.time.map((t, i) => ({
-      time: t, hour: new Date(t).getHours(),
+      time: t,
+      hour: new Date(t).getUTCHours(),
       prob: data.hourly.precipitation_probability[i],
       precip: data.hourly.precipitation[i],
       temp: data.hourly.temperature_2m[i],
