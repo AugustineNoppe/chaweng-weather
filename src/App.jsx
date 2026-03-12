@@ -375,7 +375,7 @@ export default function ChawengWeather() {
           <div className="fade">
             <div style={S.card}>
               <div style={{ ...S.label, marginBottom: "16px" }}>Log a Prediction vs Reality</div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "12px", marginBottom: "12px" }}>
                 <div>
                   <div style={S.label}>Date</div>
                   <input type="date" value={fbForm.date} onChange={e => setFbForm(f => ({ ...f, date: e.target.value }))} style={S.input} />
