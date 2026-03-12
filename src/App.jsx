@@ -1,4 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient('https://tywmvcsskxqdznvpoqzo.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5d212Y3Nza3hxZHpudnBvcXpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMDk4NDMsImV4cCI6MjA4ODc4NTg0M30.YkbXHFdEkMNuj9psJnHQ7SJESV41G4TXhq4SPVuyv2I');
 
 const LAT = 9.531;
 const LON = 100.061;
@@ -47,16 +50,6 @@ function getEventWindow(hourlyData, startHour, durationHours) {
   return { maxProb, totalPrecip, hours: windowHours };
 }
 
-const STORAGE_KEY = "chaweng_feedback_log";
-
-function loadFeedback() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); } catch { return []; }
-}
-
-function saveFeedback(entries) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
-}
-
 export default function ChawengWeather() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -66,7 +59,7 @@ export default function ChawengWeather() {
   const [eventDuration, setEventDuration] = useState(4);
   const [activeTab, setActiveTab] = useState("today");
   const [view, setView] = useState("dashboard"); // dashboard | feedback
-  const [feedback, setFeedback] = useState(loadFeedback);
+  const [feedback, setFeedback] = useState([]);
   const [fbForm, setFbForm] = useState({ date: new Date().toISOString().split("T")[0], predicted: "", actual: "", heavy: false, notes: "" });
   const [fbSaved, setFbSaved] = useState(false);
 
@@ -85,6 +78,17 @@ export default function ChawengWeather() {
   }, []);
 
   useEffect(() => { fetchWeather(); }, [fetchWeather]);
+
+  useEffect(() => {
+    const fetchFeedback = async () => {
+      const { data, error } = await supabase
+        .from('weather_feedback')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (!error && data) setFeedback(data);
+    };
+    fetchFeedback();
+  }, []);
 
   const now = new Date();
   const bangkokOffset = 7 * 60;
@@ -132,21 +136,23 @@ export default function ChawengWeather() {
     return d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric" });
   };
 
-  const submitFeedback = () => {
+  const submitFeedback = async () => {
     if (!fbForm.predicted || !fbForm.actual) return;
-    const entry = { ...fbForm, id: Date.now(), saved: new Date().toISOString() };
-    const updated = [entry, ...feedback];
-    setFeedback(updated);
-    saveFeedback(updated);
-    setFbSaved(true);
-    setTimeout(() => setFbSaved(false), 2000);
-    setFbForm({ date: new Date().toISOString().split("T")[0], predicted: "", actual: "", heavy: false, notes: "" });
+    const { data, error } = await supabase
+      .from('weather_feedback')
+      .insert([{ date: fbForm.date, predicted: parseInt(fbForm.predicted), actual: fbForm.actual, heavy: fbForm.heavy, notes: fbForm.notes }])
+      .select();
+    if (!error && data) {
+      setFeedback(f => [data[0], ...f]);
+      setFbSaved(true);
+      setTimeout(() => setFbSaved(false), 2000);
+      setFbForm({ date: new Date().toISOString().split('T')[0], predicted: '', actual: '', heavy: false, notes: '' });
+    }
   };
 
-  const deleteFeedback = (id) => {
-    const updated = feedback.filter(f => f.id !== id);
-    setFeedback(updated);
-    saveFeedback(updated);
+  const deleteFeedback = async (id) => {
+    await supabase.from('weather_feedback').delete().eq('id', id);
+    setFeedback(f => f.filter(x => x.id !== id));
   };
 
   const accuracy = feedback.length > 0 ? (() => {
