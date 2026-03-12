@@ -97,27 +97,38 @@ export default function ChawengWeather() {
   }, []);
 
   const now = new Date();
-  const bangkokOffset = 7 * 60;
-  const bangkokNow = new Date(now.getTime() + (bangkokOffset + now.getTimezoneOffset()) * 60000);
-  const bangkokDateStr = bangkokNow.toISOString().split('T')[0];
-  const bangkokHour = bangkokNow.getUTCHours();
-  const currentHourStr = bangkokDateStr + 'T' + bangkokHour.toString().padStart(2, '0');
+  const getBangkokDateStr = (offsetDays = 0) => {
+    const bangkokOffset = 7 * 60;
+    const d = new Date(now.getTime() + (bangkokOffset + now.getTimezoneOffset()) * 60000);
+    d.setDate(d.getDate() + offsetDays);
+    return d.toISOString().split('T')[0];
+  };
+
+  const getBangkokHour = () => {
+    const bangkokOffset = 7 * 60;
+    const d = new Date(now.getTime() + (bangkokOffset + now.getTimezoneOffset()) * 60000);
+    return d.getHours();
+  };
+
+  const todayStr = getBangkokDateStr(0);
+  const currentHour = getBangkokHour();
 
   const getHourlyForDay = (dayOffset) => {
     if (!data) return [];
-    const target = new Date(bangkokNow);
-    target.setUTCDate(target.getUTCDate() + dayOffset);
-    const dateStr = target.toISOString().split('T')[0];
-    return data.hourly.time.map((t, i) => ({
-      time: t,
-      hour: new Date(t).getUTCHours(),
-      prob: data.hourly.precipitation_probability[i],
-      precip: data.hourly.precipitation[i],
-      temp: data.hourly.temperature_2m[i],
-      wind: data.hourly.windspeed_10m[i],
-      wmo: data.hourly.weathercode[i],
-      isCurrent: t.startsWith(currentHourStr),
-    })).filter(h => h.time.startsWith(dateStr));
+    const dateStr = getBangkokDateStr(dayOffset);
+    return data.hourly.time.map((t, i) => {
+      const hour = parseInt(t.split('T')[1].split(':')[0]);
+      return {
+        time: t,
+        hour,
+        prob: data.hourly.precipitation_probability[i],
+        precip: data.hourly.precipitation[i],
+        temp: data.hourly.temperature_2m[i],
+        wind: data.hourly.windspeed_10m[i],
+        wmo: data.hourly.weathercode[i],
+        isCurrent: t.startsWith(dateStr) && hour === currentHour,
+      };
+    }).filter(h => h.time.startsWith(dateStr));
   };
 
   const todayHours = getHourlyForDay(0);
