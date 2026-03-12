@@ -60,7 +60,7 @@ export default function ChawengWeather() {
   const [activeTab, setActiveTab] = useState("today");
   const [view, setView] = useState("dashboard"); // dashboard | feedback
   const [feedback, setFeedback] = useState([]);
-  const [fbForm, setFbForm] = useState({ date: new Date().toISOString().split("T")[0], predicted: "", actual: "", heavy: false, notes: "" });
+  const [fbForm, setFbForm] = useState({ date: new Date().toISOString().split("T")[0], time: '', predicted: "", actual: "", heavy: false, notes: "" });
   const [fbSaved, setFbSaved] = useState(false);
 
   const fetchWeather = useCallback(async () => {
@@ -140,13 +140,13 @@ export default function ChawengWeather() {
     if (!fbForm.predicted || !fbForm.actual) return;
     const { data, error } = await supabase
       .from('weather_feedback')
-      .insert([{ date: fbForm.date, predicted: parseInt(fbForm.predicted), actual: fbForm.actual, heavy: fbForm.heavy, notes: fbForm.notes }])
+      .insert([{ date: fbForm.date, time: fbForm.time, predicted: parseInt(fbForm.predicted), actual: fbForm.actual, heavy: fbForm.heavy, notes: fbForm.notes }])
       .select();
     if (!error && data) {
       setFeedback(f => [data[0], ...f]);
       setFbSaved(true);
       setTimeout(() => setFbSaved(false), 2000);
-      setFbForm({ date: new Date().toISOString().split('T')[0], predicted: '', actual: '', heavy: false, notes: '' });
+      setFbForm({ date: new Date().toISOString().split('T')[0], time: '', predicted: '', actual: '', heavy: false, notes: '' });
     }
   };
 
@@ -381,6 +381,10 @@ export default function ChawengWeather() {
                   <input type="date" value={fbForm.date} onChange={e => setFbForm(f => ({ ...f, date: e.target.value }))} style={S.input} />
                 </div>
                 <div>
+                  <div style={S.label}>Time (approx)</div>
+                  <input type="time" value={fbForm.time} onChange={e => setFbForm(f => ({ ...f, time: e.target.value }))} style={S.input} />
+                </div>
+                <div>
                   <div style={S.label}>App predicted rain % (approx)</div>
                   <input type="number" min="0" max="100" placeholder="e.g. 65" value={fbForm.predicted} onChange={e => setFbForm(f => ({ ...f, predicted: e.target.value }))} style={S.input} />
                 </div>
@@ -447,6 +451,10 @@ export default function ChawengWeather() {
                       <div>
                         <div style={S.label}>Date</div>
                         <div style={{ fontSize: "14px", color: "#e2e8f0" }}>{f.date}</div>
+                      </div>
+                      <div>
+                        <div style={S.label}>Time</div>
+                        <div style={{ fontSize: '14px', color: '#e2e8f0' }}>{f.time || '—'}</div>
                       </div>
                       <div>
                         <div style={S.label}>Predicted</div>
