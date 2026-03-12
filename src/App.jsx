@@ -87,13 +87,17 @@ export default function ChawengWeather() {
   useEffect(() => { fetchWeather(); }, [fetchWeather]);
 
   const now = new Date();
-  const currentHourStr = now.toISOString().slice(0, 13);
+  const bangkokOffset = 7 * 60;
+  const bangkokTime = new Date(now.getTime() + (bangkokOffset + now.getTimezoneOffset()) * 60000);
+  const currentHourStr = bangkokTime.toISOString().slice(0, 13).replace("T", "T").slice(0, 13);
 
   const getHourlyForDay = (dayOffset) => {
     if (!data) return [];
     const target = new Date(now);
     target.setDate(target.getDate() + dayOffset);
-    const dateStr = target.toISOString().split("T")[0];
+    const bangkokOffset = 7 * 60;
+    const bangkokNow = new Date(target.getTime() + (bangkokOffset + target.getTimezoneOffset()) * 60000);
+    const dateStr = bangkokNow.toISOString().split("T")[0];
     return data.hourly.time.map((t, i) => ({
       time: t, hour: new Date(t).getHours(),
       prob: data.hourly.precipitation_probability[i],
