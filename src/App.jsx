@@ -225,6 +225,7 @@ export default function ChawengWeather() {
           <button style={S.navBtn(view === "feedback")} onClick={() => setView("feedback")}>
             Feedback {feedback.length > 0 && <span style={{ background: "#1e3448", borderRadius: "10px", padding: "1px 7px", fontSize: "11px", marginLeft: "4px" }}>{feedback.length}</span>}
           </button>
+          <button style={S.navBtn(view === "tides")} onClick={() => setView("tides")}>Tides</button>
           <button onClick={fetchWeather} style={{ ...S.btn(), padding: "7px 14px", fontSize: "12px" }}>↻ Refresh</button>
         </div>
       </div>
@@ -509,6 +510,33 @@ export default function ChawengWeather() {
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {/* TIDES VIEW */}
+        {view === "tides" && (
+          <div className="fade">
+            <div style={S.card}>
+              <div style={{ ...S.label, marginBottom: "12px" }}>Koh Samui Tide Chart · 7 Days</div>
+              <iframe
+                src="https://tideschart.com/Thailand/Surat-Thani/Ko-Samui/?unit=metric"
+                style={{ width: "100%", height: "500px", border: "none", borderRadius: "6px" }}
+                title="Koh Samui Tides"
+              />
+            </div>
+            <div style={S.card}>
+              <div style={{ ...S.label, marginBottom: "8px" }}>Quick Links</div>
+              {[
+                { label: "7 Day Tide Table", sub: "High & low times", href: "https://tideschart.com/Thailand/Surat-Thani/Ko-Samui/", color: "#7dd3fc" },
+                { label: "Tide King", sub: "Koh Samui weekly chart", href: "https://tideking.com/Thailand/Surat-Thani/Ko-Samui/Tides/", color: "#4ade80" },
+              ].map((l, i) => (
+                <a key={i} href={l.href} target="_blank" rel="noopener noreferrer"
+                  style={{ ...S.card, marginBottom: "8px", borderColor: `${l.color}20`, display: "block" }}>
+                  <div style={{ fontSize: "13px", color: l.color, fontWeight: 500, marginBottom: "3px" }}>↗ {l.label}</div>
+                  <div style={{ fontSize: "12px", color: "#4a7a9b" }}>{l.sub}</div>
+                </a>
+              ))}
+            </div>
           </div>
         )}
 
