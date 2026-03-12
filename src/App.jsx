@@ -384,11 +384,25 @@ export default function ChawengWeather() {
               <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "12px", marginBottom: "12px" }}>
                 <div>
                   <div style={S.label}>Date</div>
-                  <input type="date" value={fbForm.date} onChange={e => setFbForm(f => ({ ...f, date: e.target.value }))} style={S.input} />
+                  <select value={fbForm.date} onChange={e => setFbForm(f => ({ ...f, date: e.target.value }))} style={S.input}>
+                    {Array.from({ length: 7 }, (_, i) => {
+                      const bangkokOffset = 7 * 60;
+                      const d = new Date(new Date().getTime() + (bangkokOffset + new Date().getTimezoneOffset()) * 60000);
+                      d.setDate(d.getDate() - i);
+                      const val = d.toISOString().split('T')[0];
+                      const label = d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+                      return <option key={val} value={val}>{label}</option>;
+                    })}
+                  </select>
                 </div>
                 <div>
                   <div style={S.label}>Time (approx)</div>
-                  <input type="time" value={fbForm.time} onChange={e => setFbForm(f => ({ ...f, time: e.target.value }))} style={S.input} />
+                  <select value={fbForm.time} onChange={e => setFbForm(f => ({ ...f, time: e.target.value }))} style={S.input}>
+                    {Array.from({ length: 24 }, (_, i) => {
+                      const h = i.toString().padStart(2, '0');
+                      return <option key={h} value={`${h}:00`}>{`${h}:00`}</option>;
+                    })}
+                  </select>
                 </div>
                 <div>
                   <div style={S.label}>App predicted rain % (approx)</div>
