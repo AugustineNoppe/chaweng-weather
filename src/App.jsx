@@ -60,7 +60,13 @@ export default function ChawengWeather() {
   const [activeTab, setActiveTab] = useState("today");
   const [view, setView] = useState("dashboard"); // dashboard | feedback
   const [feedback, setFeedback] = useState([]);
-  const [fbForm, setFbForm] = useState({ date: new Date().toISOString().split("T")[0], time: '', predicted: "", actual: "", heavy: false, notes: "" });
+  const [fbForm, setFbForm] = useState(() => {
+  const bangkokOffset = 7 * 60;
+  const bangkokTime = new Date(new Date().getTime() + (bangkokOffset + new Date().getTimezoneOffset()) * 60000);
+  const timeStr = bangkokTime.toTimeString().slice(0, 5);
+  const dateStr = bangkokTime.toISOString().split('T')[0];
+  return { date: dateStr, time: timeStr, predicted: '', actual: '', heavy: false, notes: '' };
+});
   const [fbSaved, setFbSaved] = useState(false);
 
   const fetchWeather = useCallback(async () => {
@@ -375,7 +381,7 @@ export default function ChawengWeather() {
           <div className="fade">
             <div style={S.card}>
               <div style={{ ...S.label, marginBottom: "16px" }}>Log a Prediction vs Reality</div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px", marginBottom: "12px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "12px", marginBottom: "12px" }}>
                 <div>
                   <div style={S.label}>Date</div>
                   <input type="date" value={fbForm.date} onChange={e => setFbForm(f => ({ ...f, date: e.target.value }))} style={S.input} />
