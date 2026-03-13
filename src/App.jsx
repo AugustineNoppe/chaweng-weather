@@ -156,15 +156,39 @@ export default function ChawengWeather() {
 
   const submitFeedback = async () => {
     if (!fbForm.predicted || !fbForm.actual) return;
-    const { data, error } = await supabase
-      .from('weather_feedback')
-      .insert([{ date: fbForm.date, time: fbForm.time, predicted: parseInt(fbForm.predicted), actual: fbForm.actual, heavy: fbForm.heavy, notes: fbForm.notes }])
-      .select();
-    if (!error && data) {
-      setFeedback(f => [data[0], ...f]);
-      setFbSaved(true);
-      setTimeout(() => setFbSaved(false), 2000);
-      setFbForm({ date: new Date().toISOString().split('T')[0], time: '', predicted: '', actual: '', heavy: false, notes: '' });
+    try {
+      const { data, error } = await supabase
+        .from('weather_feedback')
+        .insert([{
+          date: fbForm.date,
+          time: fbForm.time,
+          predicted: parseInt(fbForm.predicted),
+          actual: fbForm.actual,
+          heavy: fbForm.heavy === true || fbForm.heavy === 'true',
+          notes: fbForm.notes
+        }])
+        .select();
+      if (error) {
+        alert('Save failed: ' + error.message);
+        return;
+      }
+      if (data) {
+        setFeedback(f => [data[0], ...f]);
+        setFbSaved(true);
+        setTimeout(() => setFbSaved(false), 2000);
+        const bangkokOffset = 7 * 60;
+        const bangkokTime = new Date(new Date().getTime() + (bangkokOffset + new Date().getTimezoneOffset()) * 60000);
+        setFbForm({
+          date: bangkokTime.toISOString().split('T')[0],
+          time: bangkokTime.toTimeString().slice(0, 5),
+          predicted: '',
+          actual: '',
+          heavy: false,
+          notes: ''
+        });
+      }
+    } catch(e) {
+      alert('Error: ' + e.message);
     }
   };
 
