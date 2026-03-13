@@ -65,7 +65,7 @@ export default function ChawengWeather() {
   const bangkokTime = new Date(new Date().getTime() + (bangkokOffset + new Date().getTimezoneOffset()) * 60000);
   const timeStr = bangkokTime.toTimeString().slice(0, 5);
   const dateStr = bangkokTime.toISOString().split('T')[0];
-  return { date: dateStr, time: timeStr, predicted: '', actual: '', heavy: false, notes: '' };
+  return { date: dateStr, time: timeStr, actual: '', heavy: false, notes: '' };
 });
   const [fbSaved, setFbSaved] = useState(false);
 
@@ -155,14 +155,13 @@ export default function ChawengWeather() {
   };
 
   const submitFeedback = async () => {
-    if (!fbForm.predicted || !fbForm.actual) return;
+    if (!fbForm.actual) return;
     try {
       const { data, error } = await supabase
         .from('weather_feedback')
         .insert([{
           date: fbForm.date,
           time: fbForm.time,
-          predicted: parseInt(fbForm.predicted),
           actual: fbForm.actual,
           heavy: fbForm.heavy === true || fbForm.heavy === 'true',
           notes: fbForm.notes
@@ -181,7 +180,6 @@ export default function ChawengWeather() {
         setFbForm({
           date: bangkokTime.toISOString().split('T')[0],
           time: bangkokTime.toTimeString().slice(0, 5),
-          predicted: '',
           actual: '',
           heavy: false,
           notes: ''
@@ -440,10 +438,6 @@ export default function ChawengWeather() {
                       return <option key={h} value={`${h}:00`}>{`${h}:00`}</option>;
                     })}
                   </select>
-                </div>
-                <div>
-                  <div style={S.label}>App predicted rain % (approx)</div>
-                  <input type="number" min="0" max="100" placeholder="e.g. 65" value={fbForm.predicted} onChange={e => setFbForm(f => ({ ...f, predicted: e.target.value }))} style={S.input} />
                 </div>
                 <div>
                   <div style={S.label}>Did it actually rain?</div>
